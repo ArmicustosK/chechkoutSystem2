@@ -1,6 +1,5 @@
 import re
 import unittest
-import math
 
 class product():
 
@@ -8,9 +7,11 @@ class product():
        return self.name
 
      def getPrice(self):
-       return self.price
+         price=self.price-self.markdown
+         return price
      def getMarkdown(self):
         return self.markdown
+
      def getCode(self):
        return self.special_code
     
@@ -79,7 +80,7 @@ def scan_item(checkout_product):
        print("The item is not scannable")
        return
    key=temp_object.getName()
-   price=temp_object.getPrice()-temp_object.getMarkdown()
+   price=temp_object.getPrice()
    add_number=1
    if(temp_object.ifbyweight):
        add_number=input("enter item weight ")
@@ -102,10 +103,28 @@ def remove_item():
     else:
         checkout_list[remove_item]['count']-=1
         checkout_list[remove_item]['price']-=item.getPrice()
+def get_total():
+    total=0
+    for item in checkout_list.values():
+       curr_product=item['product']
+       item_count=item['count']
+     
+       total+=item['price']-get_discount(curr_product,item_count)
+    return total
+def get_discount(curr_product,count):
+    discount=0
+    if(curr_product.getCode()==1):
+        
+        discount=int(count/2)*curr_product.getPrice()
+    if(curr_product.getCode()==2):
+        discount=int(count/3)*0.5*curr_product.getPrice()
+    if(curr_product.getCode()==3):
+        discount=int(count/3)*0.2*2*curr_product.getPrice()
+    return discount
 if __name__ == '__main__':
     dict={}
     checkout_list={}
-    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"",False,0),product('Peach',1.5,"",False,0.5)]
+    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"buy1get1free",False,0),product('Peach',1.5,"buy2get1halfoff",False,0.5)]
     init_productList();
     total=0
    
@@ -116,6 +135,6 @@ if __name__ == '__main__':
         else:
             scan_item(checkout_item)
         checkout_item=str(input("enter item name or '0' to exit, 'c'to cancel item"))
-    
+    print(get_total())
     unittest.main(exit=False)
 
