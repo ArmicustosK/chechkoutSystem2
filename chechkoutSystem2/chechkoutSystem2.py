@@ -1,16 +1,69 @@
 import re
 import unittest
 class Discount ():
+    def getCode(self):
+        return self.code
+    def getSpecialprice(self):
+        return self.special_price
     def getApplyPosition(self):
         return self.position
     def getLimit(self):
         return self.limit
     def getValue(self):
         return self.value
-    def __init__(self, position, value,limit):
-        self.position=position
-        self.value=value
-        self.limit=limit if limit is not None else 0
+    def setDiscount(self,specialoffer):
+       str=re.sub(r"\s+", "", specialoffer.lower())
+       if ( str== "buy1get1free"):
+           self.position=2
+           self.value=1
+           self.limit=0
+           self.code=1
+       if(str=="buy2get1halfoff"):
+           self.position=3
+           self.value=0.5
+           self.limit=0
+           self.code=1
+       if(str=="buy3get220%off"):
+           self.position=5
+           self.value=0.4
+           self.limit=0
+           self.code=1
+       if(str=="3for$5"):
+           self.position=3
+           self.special_price=5
+           self.code=2
+       if(str=="2for$3"):
+           self.position=2
+           self.special_price=3
+           self.code=2
+       #if(str=="buy3lbsget1lbhalfoff"):
+       #    return 6
+       if(str=="buy1get1free,limit6"):
+           self.position=2
+           self.value=1
+           self.limit=6
+           self.code=1
+       if(str=="buy2get1halfoff,limit8"):
+           self.position=3
+           self.value=0.5
+           self.limit=8
+           self.code=1
+       if(str=="buy3get220%off,limit10"):
+           self.position=5
+           self.value=0.4
+           self.limit=10
+           self.code=1
+       #if(str=="buy3.5lbget1.5lbhalfoff"):
+       #    return 9
+    def __init__(self,specialoffer):
+        self.code=0
+        self.position=0
+        self.value=0
+        self.limit=0
+        self.special_price=0
+        self.setDiscount(specialoffer)
+     
+
 class product():
 
      def getName(self):
@@ -25,36 +78,13 @@ class product():
      def getDiscount(self):
         return self.discount
     
-     def setDiscount(self,specialoffer):
-       str=re.sub(r"\s+", "", specialoffer.lower())
-       if ( str== "buy1get1free"):
-           return Discount(2,1,None)
-       if(str=="buy2get1halfoff"):
-           return Discount(3,0.5,None)
-       if(str=="buy3get220%off"):
-          return Discount(5,0.4,None)
-       if(str=="3for$5"):
-           return 4
-       if(str=="2for$2.5"):
-           return 5
-       if(str=="buy3lbsget1lbhalfoff"):
-           return 6
-       if(str=="buy1get1free,limit6"):
-           return Discount(2,1,6)
-       if(str=="buy2get1halfoff,limit8"):
-           return Discount(3,0.5,8)
-       if(str=="buy3get220%off,limit10"):
-          return Discount(5,0.4,10)
-       if(str=="buy3.5lbget1.5lbhalfoff"):
-           return 9
-       
      def __init__(self,name, price, specialoffer , ifbyweight, markdown):
        self.name = name.lower()
        self.price = price
        self.markdown=markdown
        self.discount=None
        if(specialoffer is not None):
-        self.discount=self.setDiscount(specialoffer)
+        self.discount=Discount(specialoffer)
       
        self.ifbyweight = ifbyweight
 class test(unittest.TestCase):
@@ -84,16 +114,16 @@ class test(unittest.TestCase):
          self.assertEqual(item1.discount.getValue(),1)
          self.assertEqual(item1.discount.getLimit(),6) 
      def test_discount(self):
-          checkout_list={}
-         #test discount item cal by unit without limit 
-         #apple*4+peach*4
-         #total=8*2.2-(4*2.2)+1*4-(1*1*0.5)=
-          checkout_items=["apple","peach","apple","peach","apple","apple","apple","peach","peach","apple","apple","apple"]
-          for item in checkout_items:
-              scan_item(item)
-          self.assertEqual(round(get_total(), 2),12.3)
+        checkout_list={}
+        #test discount item cal by unit without limit 
+        #apple*4+peach*4
+        #total=8*2.2-(4*2.2)+1*4-(1*1*0.5)=
+        checkout_items=["apple","peach","apple","peach","apple","apple","apple","peach","peach","apple","apple","apple"]
+        for item in checkout_items:
+            scan_item(item)
+        self.assertEqual(round(get_total(), 2),12.3)
      def test_discountWithLimit(self):
-         #test discount item cal by unit without limit 
+         #test discount item cal by unit without limit  
          #kiwi*8+banana*9
          #total=8*2.2-(3*2.2)+1*9-(1*2*0.5)=19
           checkout_list.clear()
@@ -101,6 +131,15 @@ class test(unittest.TestCase):
           for item in checkout_items:
               scan_item(item)
           self.assertEqual(round(get_total(), 2),19)
+     def test_discountwithSpeicalPrice(self):
+         #test discount item cal by unit with discount "buy N for $M" 
+         #potato*7+tomato*5+banana*3
+         #total=5+5+1*2+3+3+2+3-0.5=22.5
+          checkout_list.clear()
+          checkout_items=["potato","tomato","potato","tomato","potato","tomato","potato","tomato","potato","tomato","potato","banana","potato","banana","banana"]
+          for item in checkout_items:
+              scan_item(item)
+          self.assertEqual(round(get_total(), 2),22.5)
 def init_productList():
    for input in inputList:
 
@@ -127,8 +166,13 @@ def scan_item(checkout_product):
         checkout_list[key]['count']=position
         if (discount is not None):
             if(position%discount.getApplyPosition()==0):
-                if(discount.getLimit()==0 or (discount.getLimit()!=0 and position<=discount.getLimit())):
-                    total=total-discount.getValue()*price
+                if(discount.getCode()==1):
+                    if(discount.getCode()==1 and discount.getLimit()==0 or (discount.getLimit()!=0 and position<=discount.getLimit())):
+                          total=total-discount.getValue()*price
+                elif(discount.getCode()==2):
+                    checkout_list[key]['total']=discount.getSpecialprice()*(position/discount.getApplyPosition())
+                    total=0
+                    #total=discount.getSpecialprice()
         checkout_list[key]['total']+=total    
    else:
        checkout_list[key]={'product':temp_object,'count':add_number,'total':total}
@@ -169,7 +213,14 @@ def get_total():
 if __name__ == '__main__':
     dict={}
     checkout_list={}
-    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"buy1get1free",False,0),product('kiwi',2.2,"buy1get1free,limit6",False,0),product('Peach',1.5,"buy2get1halfoff",False,0.5),product('banana',1.5,"buy2get1halfoff,limit8",False,0.5)]
+    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33)
+               ,product('pork',2.2,"",True,0)
+               ,product('Apple',2.2,"buy1get1free",False,0)
+               ,product('kiwi',2.2,"buy1get1free,limit6",False,0)
+               ,product('Peach',1.5,"buy2get1halfoff",False,0.5)
+               ,product('banana',1.5,"buy2get1halfoff,limit8",False,0.5)
+               ,product('potato',2.5,"3for$5",False,0.5)
+               ,product('tomato',2,"2for$3",False,0)]
     init_productList();
     total=0
    
