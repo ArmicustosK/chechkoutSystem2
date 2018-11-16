@@ -1,12 +1,22 @@
 import re
 import unittest
-
+class Discount ():
+    def getApplyPosition(self):
+        return self.position
+    def getLimit(self):
+        return self.limit
+    def getValue(self):
+        return self.value
+    def __init__(self, position, value,limit):
+        self.position=position
+        self.value=value
+        self.limit=limit if limit is not None else 0
 class product():
 
      def getName(self):
        return self.name
 
-     def getPrice(self):
+     def getPrice(sel1f):
          price=self.price-self.markdown
          return price
      def getMarkdown(self):
@@ -15,14 +25,14 @@ class product():
      def getCode(self):
        return self.special_code
     
-     def setcode(self,specialoffer):
+     def setDiscount(self,specialoffer):
        str=re.sub(r"\s+", "", specialoffer.lower())
        if ( str== "buy1get1free"):
-           return 1
+           return Discount(2,1,None)
        if(str=="buy2get1halfoff"):
-           return 2
+           return Discount(3,0.5,None)
        if(str=="buy3get220%off"):
-           return 3
+          return Discount(5,0.4,None)
        if(str=="3for$5"):
            return 4
        if(str=="2for$2.5"):
@@ -30,23 +40,22 @@ class product():
        if(str=="buy3lbsget1lbhalfoff"):
            return 6
        if(str=="buy1get1free,limit6"):
-           return 7
-       
-       if(str=="buy3get1halfoff,limit8"):
-           return 8
+           return Discount(2,1,6)
+       if(str=="buy2get1halfoff,limit8"):
+           return Discount(3,0.5,8)
+       if(str=="buy3get220%off,limit10"):
+          return Discount(5,0.4,10)
        if(str=="buy3.5lbget1.5lbhalfoff"):
            return 9
-       if(str=="buy3get220%off,limit10"):
-           return 10
+       
      def __init__(self,name, price, specialoffer , ifbyweight, markdown):
        self.name = name.lower()
        self.price = price
        self.markdown=markdown
-
-       self.special_code=0 if specialoffer is None else self.setcode(specialoffer)
-       #if(specialoffer is not None):
-       #     self.specialoffer=specialoffer.lower()
-       #     self.special_code=self.setcode()
+       self.discount=None
+       if(specialoffer is not None):
+        self.discount=self.setDiscount(specialoffer)
+      
        self.ifbyweight = ifbyweight
 class test(unittest.TestCase):
     
@@ -65,16 +74,21 @@ class test(unittest.TestCase):
          for input in inputList:
              self.assertEqual(dict[input.getName()],input)
             
-
-     
-             
-
+     def test_properdiscount(self):
+         item=product('banana',3.2,"buy 1 get 1 free",True,0.33)
+         self.assertEqual(item.discount.getApplyPosition(),2)
+         self.assertEqual(item.discount.getValue(),1)
+         self.assertEqual(item.discount.getLimit(),0)   
+         item1=product('kiwa',4.2,"buy 1 get 1 free, limit 6",True,0.33)
+         self.assertEqual(item1.discount.getApplyPosition(),2)
+         self.assertEqual(item1.discount.getValue(),1)
+         self.assertEqual(item1.discount.getLimit(),6) 
 
 
 def init_productList():
-       for input in inputList:
+   for input in inputList:
 
-            dict[input.getName()] = input
+      dict[input.getName()] = input
 
 def scan_item(checkout_product):
    temp_object=dict.get(checkout_product.lower())
@@ -113,26 +127,28 @@ def get_total():
      
        total+=item['price']-get_discount(curr_product,item_count)
     return total
-def get_discount(curr_product,count):
-    discount=0
-    if(curr_product.getCode()==1 or curr_product.getCode()==7):
-        count=6 if count>6 else count
-        discount=int(count/2)*curr_product.getPrice()
-    if(curr_product.getCode()==2 or curr_product.getCode()==8):
-        count=8 if count>8 else count
-        discount=int(count/3)*0.5*curr_product.getPrice()
-    if(curr_product.getCode()==3 or curr_product.getCode()==10):
-        count=10 if count>10 else count
-        discount=int(count/3)*0.2*2*curr_product.getPrice()
-     
+#def get_discount(curr_product,count):
+#    discount=0
+#    if(curr_product.getCode()==1 or curr_product.getCode()==7):
+#        count=6 if count>6 else count
+#        discount=int(count/2)*curr_product.getPrice()
+#    if(curr_product.getCode()==2 or curr_product.getCode()==8):
+#        count=8 if count>8 else count
+#        discount=int(count/3)*0.5*curr_product.getPrice()
+#    if(curr_product.getCode()==3 or curr_product.getCode()==10):
+#        count=10 if count>10 else count
+#        discount=int(count/3)*0.2*2*curr_product.getPrice()
+#      #if(str=="3for$5"):
+#      #     return 4
+#      # if(str=="2for$2.5"):
+#      #     return 5
     
-           
-    return discount
+#    return discount
 if __name__ == '__main__':
     dict={}
     checkout_list={}
-    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"buy1get1free",False,0),product('Peach',1.5,"buy2get1halfoff",False,0.5)]
-    init_productList();
+    #inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"buy1get1free",False,0),product('Peach',1.5,"buy2get1halfoff",False,0.5)]
+    #init_productList();
     total=0
    
     checkout_item=str(input("enter item name or '0' to exit, 'c'to cancel item"))
@@ -142,6 +158,6 @@ if __name__ == '__main__':
         else:
             scan_item(checkout_item)
         checkout_item=str(input("enter item name or '0' to exit, 'c'to cancel item"))
-    print(get_total())
+    
     unittest.main(exit=False)
 
