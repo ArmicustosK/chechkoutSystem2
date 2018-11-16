@@ -1,5 +1,6 @@
 import re
 import unittest
+import math
 
 class product():
 
@@ -8,11 +9,12 @@ class product():
 
      def getPrice(self):
        return self.price
-     
+     def getMarkdown(self):
+        return self.markdown
      def getCode(self):
        return self.special_code
-   
-     def setcode(self):
+    
+     def setcode(self,specialoffer):
        str=re.sub(r"\s+", "", self.specialoffer.lower())
        if ( str== "buy1get1free"):
            return 1
@@ -33,13 +35,15 @@ class product():
            return 8
        if(str=="buy3.5lbget1.5lbhalfoff"):
            return 9
-     def __init__(self,name, price, specialoffer , ifbyweight):
-       self.name = name
+     def __init__(self,name, price, specialoffer , ifbyweight, markdown):
+       self.name = name.lower()
        self.price = price
-       if(specialoffer is not None):
-            self.specialoffer=specialoffer
-       
-            self.special_code=self.setcode()
+       self.markdown=markdown
+
+       self.special_code=0 if specialoffer is None else self.setcode(specialoffer)
+       #if(specialoffer is not None):
+       #     self.specialoffer=specialoffer.lower()
+       #     self.special_code=self.setcode()
        self.ifbyweight = ifbyweight
 class test(unittest.TestCase):
     
@@ -59,39 +63,46 @@ class test(unittest.TestCase):
              self.assertEqual(dict[input.getName()],input)
             
 
-     #def test_loop(self):
-     #    while checkout_product!="0":
+     
              
 
 
 
-dict={}
-checkout_list={'apple':{'count':0,'price':0}}
-inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True),product('pork',2.2,"",False)]
 def init_productList():
        for input in inputList:
 
             dict[input.getName()] = input
-def discountProcessor():
-    return 1;
+
 def scan_item(checkout_product):
    temp_object=dict.get(checkout_product.lower())
+   if (temp_object is None):
+       print("The item is not scannable")
+       return
    key=temp_object.getName()
-   price=temp_object.getPrice()
-   if key in checkout_list:
-        checkout_list[key]["count"]+=1
+   price=temp_object.getPrice()-temp_object.getMarkdown()
+   add_number=1
+   if(temp_object.ifbyweight):
+       add_number=input("enter item weight ")
+       price=float(price)*float(add_number)
+   item = checkout_list.get(key)
+   if item is not None:
+        checkout_list[key]['count']+=add_number
+        checkout_list[key]['price']+=price
+        
    else:
-       checkout_list[key]={'count':1,'price':price}
-    
-    
-init_productList();
-total=0
-checkout_item=str(input("enter item name or '0' to exit "))
-while(checkout_item!="0"):   
- scan_item(checkout_item)
- checkout_item=str(input("enter item name or '0' to exit "))
-   
- 
+       checkout_list[key]={'count':add_number,'price':price,}
+
 if __name__ == '__main__':
+    dict={}
+    checkout_list={}
+    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"",False,0),product('Peach',1.5,"",False,0.5)]
+    init_productList();
+    total=0
+   
+    checkout_item=str(input("enter item name or '0' to exit "))
+    while(checkout_item!="0"):   
+        scan_item(checkout_item)
+        checkout_item=str(input("enter item name or '0' to exit "))
+  
     unittest.main(exit=False)
 
