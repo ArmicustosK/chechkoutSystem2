@@ -16,14 +16,14 @@ class product():
      def getName(self):
        return self.name
 
-     def getPrice(sel1f):
+     def getPrice(self):
          price=self.price-self.markdown
          return price
      def getMarkdown(self):
         return self.markdown
 
-     def getCode(self):
-       return self.special_code
+     def getDiscount(self):
+        return self.discount
     
      def setDiscount(self,specialoffer):
        str=re.sub(r"\s+", "", specialoffer.lower())
@@ -65,11 +65,11 @@ class test(unittest.TestCase):
      #    dict[object.getName()] = object
      #    self.assertEquals(dict['beefs'],object)
     
-     def test_inputNullcode(self):
-         object = product('beef',3.2,"",True)
-         dict[object.getName()] = object
-         object2=dict['beef']
-         assert object2.getCode() is  None
+     #def test_inputNullcode(self):
+     #    object = product('beef',3.2,"",True)
+     #    dict[object.getName()] = object
+     #    object2=dict['beef']
+     #    assert object2.getCode() is  None
      def test_dictionaryInputList(self):
          for input in inputList:
              self.assertEqual(dict[input.getName()],input)
@@ -83,8 +83,24 @@ class test(unittest.TestCase):
          self.assertEqual(item1.discount.getApplyPosition(),2)
          self.assertEqual(item1.discount.getValue(),1)
          self.assertEqual(item1.discount.getLimit(),6) 
-
-
+     def test_discount(self):
+          checkout_list={}
+         #test discount item cal by unit without limit 
+         #apple*4+peach*4
+         #total=8*2.2-(4*2.2)+1*4-(1*1*0.5)=
+          checkout_items=["apple","peach","apple","peach","apple","apple","apple","peach","peach","apple","apple","apple"]
+          for item in checkout_items:
+              scan_item(item)
+          self.assertEqual(round(get_total(), 2),12.3)
+     def test_discountWithLimit(self):
+         #test discount item cal by unit without limit 
+         #kiwi*8+banana*9
+         #total=8*2.2-(3*2.2)+1*9-(1*2*0.5)=19
+          checkout_list.clear()
+          checkout_items=["kiwi","banana","kiwi","banana","kiwi","banana","banana","banana","kiwi","banana","banana","banana","kiwi","banana","kiwi","kiwi","kiwi"]
+          for item in checkout_items:
+              scan_item(item)
+          self.assertEqual(round(get_total(), 2),19)
 def init_productList():
    for input in inputList:
 
@@ -95,19 +111,28 @@ def scan_item(checkout_product):
    if (temp_object is None):
        print("The item is not scannable")
        return
+   discount = temp_object.getDiscount()
    key=temp_object.getName()
    price=temp_object.getPrice()
+   total=price
    add_number=1
    if(temp_object.ifbyweight):
        add_number=input("enter item weight ")
-       price=float(price)*float(add_number)
+       total=float(price)*float(add_number)
+       #add discount here:
    item = checkout_list.get(key)
    if item is not None:
-        checkout_list[key]['count']+=add_number
-        checkout_list[key]['price']+=price
-        
+        position=checkout_list[key]['count']
+        position +=add_number
+        checkout_list[key]['count']=position
+        if (discount is not None):
+            if(position%discount.getApplyPosition()==0):
+                if(discount.getLimit()==0 or (discount.getLimit()!=0 and position<=discount.getLimit())):
+                    total=total-discount.getValue()*price
+        checkout_list[key]['total']+=total    
    else:
-       checkout_list[key]={'product':temp_object,'count':add_number,'price':price}
+       checkout_list[key]={'product':temp_object,'count':add_number,'total':total}
+
 def remove_item():
     remove_item=str(input("enter item you like to remove"))
     item=checkout_list.get(remove_item.lower())['product']
@@ -118,14 +143,11 @@ def remove_item():
         del checkout_list[remove_item]
     else:
         checkout_list[remove_item]['count']-=1
-        checkout_list[remove_item]['price']-=item.getPrice()
+        checkout_list[remove_item]['total']-=item.getPrice()
 def get_total():
     total=0
     for item in checkout_list.values():
-       curr_product=item['product']
-       item_count=item['count']
-     
-       total+=item['price']-get_discount(curr_product,item_count)
+        total+=item['total']
     return total
 #def get_discount(curr_product,count):
 #    discount=0
@@ -147,8 +169,8 @@ def get_total():
 if __name__ == '__main__':
     dict={}
     checkout_list={}
-    #inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"buy1get1free",False,0),product('Peach',1.5,"buy2get1halfoff",False,0.5)]
-    #init_productList();
+    inputList=[product('beef',3.2,"buy 5 get 3 half off,limit 8",True,0.33),product('pork',2.2,"",True,0),product('Apple',2.2,"buy1get1free",False,0),product('kiwi',2.2,"buy1get1free,limit6",False,0),product('Peach',1.5,"buy2get1halfoff",False,0.5),product('banana',1.5,"buy2get1halfoff,limit8",False,0.5)]
+    init_productList();
     total=0
    
     checkout_item=str(input("enter item name or '0' to exit, 'c'to cancel item"))
