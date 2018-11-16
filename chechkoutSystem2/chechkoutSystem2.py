@@ -29,13 +29,15 @@ class product():
            return 5
        if(str=="buy3lbsget1lbhalfoff"):
            return 6
-       if(str=="buy2get1free,limit6"):
+       if(str=="buy1get1free,limit6"):
            return 7
        
-       if(str=="buy5get3halfoff,limit8"):
+       if(str=="buy3get1halfoff,limit8"):
            return 8
        if(str=="buy3.5lbget1.5lbhalfoff"):
            return 9
+       if(str=="buy3get220%off,limit10"):
+           return 10
      def __init__(self,name, price, specialoffer , ifbyweight, markdown):
        self.name = name.lower()
        self.price = price
@@ -113,13 +115,18 @@ def get_total():
     return total
 def get_discount(curr_product,count):
     discount=0
-    if(curr_product.getCode()==1):
-        
+    if(curr_product.getCode()==1 or curr_product.getCode()==7):
+        count=6 if count>6 else count
         discount=int(count/2)*curr_product.getPrice()
-    if(curr_product.getCode()==2):
+    if(curr_product.getCode()==2 or curr_product.getCode()==8):
+        count=8 if count>8 else count
         discount=int(count/3)*0.5*curr_product.getPrice()
-    if(curr_product.getCode()==3):
+    if(curr_product.getCode()==3 or curr_product.getCode()==10):
+        count=10 if count>10 else count
         discount=int(count/3)*0.2*2*curr_product.getPrice()
+     
+    
+           
     return discount
 if __name__ == '__main__':
     dict={}
