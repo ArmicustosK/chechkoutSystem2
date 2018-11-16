@@ -15,7 +15,7 @@ class product():
        return self.special_code
     
      def setcode(self,specialoffer):
-       str=re.sub(r"\s+", "", self.specialoffer.lower())
+       str=re.sub(r"\s+", "", specialoffer.lower())
        if ( str== "buy1get1free"):
            return 1
        if(str=="buy2get1halfoff"):
@@ -90,8 +90,18 @@ def scan_item(checkout_product):
         checkout_list[key]['price']+=price
         
    else:
-       checkout_list[key]={'count':add_number,'price':price,}
-
+       checkout_list[key]={'product':temp_object,'count':add_number,'price':price}
+def remove_item():
+    remove_item=str(input("enter item you like to remove"))
+    item=checkout_list.get(remove_item.lower())['product']
+    if(item is None):
+        print("Invalid input, please try again")
+        return
+    if(item.ifbyweight):
+        del checkout_list[remove_item]
+    else:
+        checkout_list[remove_item]['count']-=1
+        checkout_list[remove_item]['price']-=item.getPrice()
 if __name__ == '__main__':
     dict={}
     checkout_list={}
@@ -99,10 +109,13 @@ if __name__ == '__main__':
     init_productList();
     total=0
    
-    checkout_item=str(input("enter item name or '0' to exit "))
-    while(checkout_item!="0"):   
-        scan_item(checkout_item)
-        checkout_item=str(input("enter item name or '0' to exit "))
-  
+    checkout_item=str(input("enter item name or '0' to exit, 'c'to cancel item"))
+    while(checkout_item!="0"): 
+        if(checkout_item.lower()=="c"):
+            remove_item()
+        else:
+            scan_item(checkout_item)
+        checkout_item=str(input("enter item name or '0' to exit, 'c'to cancel item"))
+    
     unittest.main(exit=False)
 
