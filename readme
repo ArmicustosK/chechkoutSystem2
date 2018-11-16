@@ -1,0 +1,17 @@
+Please see the items which order by name, price, special, ifByweight and markdown
+              Name price  special                    ifByweight markdown
+    product('beef',3.2,"buy 5 get 3 half off,limit 8",False,0.33)
+   ,product('pork',2.2,"",False,0)
+   ,product('Apple',2.2,"buy1get1free",False,0)
+   ,product('kiwi',2.2,"buy1get1free,limit6",False,0)
+   ,product('Peach',1.5,"buy2get1halfoff",False,0.5)
+   ,product('banana',1.5,"buy2get1halfoff,limit8",False,0.5)
+   ,product('potato',2.5,"3for$5",False,0.5)
+   ,product('tomato',2,"2for$3",False,0)
+   ,product('lamb',3.2,"buy3.5 lb get1.5lb half off",True,0.33)
+   ,product('chicken',1.2,"",True,0.31)]
+  
+The constant special discount are(the discounts are case insensitive and could be space within the string) :
+"buy1get1free","buy2get1halfoff","buy3get220%off","3for$5","2for$3","buy1get1free,limit6","buy2get1halfoff,limit8","buy3get220%off,limit10","buy3.5lbget1.5lbhalfoff"
+
+Thank you.
